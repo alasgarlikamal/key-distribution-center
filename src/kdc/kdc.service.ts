@@ -2,7 +2,6 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { ConflictException, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import { RegisterDto } from './dto/register.dto';
-import * as bigIntCryptoUtils from 'bigint-crypto-utils';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -40,7 +39,7 @@ export class KdcService {
     );
   }
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto): Promise<{ message: string }> {
     const { username } = registerDto;
 
     if (await this.checkUserExists(username)) {
@@ -58,7 +57,9 @@ export class KdcService {
     await this.redis.hset(`users:${username}`, { socketId, isConnected: true });
   }
 
-  async generateKeyPair(username) {
+  async generateKeyPair(
+    username: string,
+  ): Promise<{ privateKey: string; publicKey: string }> {
     const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
       modulusLength: this.keySize,
       publicKeyEncoding: {
@@ -76,7 +77,27 @@ export class KdcService {
     return { privateKey, publicKey };
   }
 
-  async getUser(username) {
+  async getEncryptedSessionKey(publicKey: string) {
+    const sessionKey = this.generateRandomSessionKey();
+    console.log(sessionKey);
+    const encryptedSessionKey = this.encryptWithPublicKey(
+      sessionKey,
+      publicKey,
+    );
+
+    return { encryptedSessionKey: encryptedSessionKey };
+  }
+
+  async decryptSessionKey(encryptedSessionKey: string, privateKey: string) {
+    const sessionKey = this.decryptWithPrivateKey(
+      encryptedSessionKey,
+      privateKey,
+    );
+
+    return { sessionKey: sessionKey };
+  }
+
+  async getUser(username: string | string[]) {
     return await this.redis.hgetall(`users:${username}`);
   }
 
@@ -92,5 +113,35 @@ export class KdcService {
 
   async disconnectSocketId(username) {
     await this.redis.hset(`users:${username}`, { isConnected: false });
+  }
+
+  generateRandomSessionKey() {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  encryptWithPublicKey(sessionKey: string, publicKey: string) {
+    const encryptedMessage = crypto.publicEncrypt(
+      {
+        key: publicKey,
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+        oaepHash: 'sha256',
+      },
+      Buffer.from(sessionKey),
+    );
+
+    return encryptedMessage.toString('base64');
+  }
+
+  decryptWithPrivateKey(encryptedSessionKey: string, privateKey: string) {
+    const decryptedMessage = crypto.privateDecrypt(
+      {
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+        oaepHash: 'sha256',
+      },
+      Buffer.from(encryptedSessionKey, 'base64'),
+    );
+
+    return decryptedMessage.toString();
   }
 }

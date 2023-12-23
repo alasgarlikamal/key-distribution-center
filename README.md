@@ -17,14 +17,15 @@ RSA inplementation: The server implementation should include user registration, 
 
 ## How it works
 
-The main purpose here is to implement an example of a Key Distribution Center(KDC). The working principle of our application is as follows:\
-If a user A wants to communicate with user B the following steps are undergone:\
+The main purpose here is to implement an example of a Key Distribution Center (KDC). The working principle of our application is as follows:
+
+If user A wants to communicate with user B, the following steps are undertaken:
 
 1. User A sends his/her public key to the User B
 2. User B generates a random session key and encrypts it with User A's public key. Then transmits the encrypted value to the user A.
 3. User A decrypts the retrieved encrypted value with his/her private key and accesses the session key.
 
-Result: Now both parties have a secure communication key which their connection can rely on safely. Now they can use the accessed session key to communicate between each other.
+Result: Now, both parties have a secure communication key upon which their connection can safely rely. They can use the accessed session key to communicate with each other.
 
 ## Endpoint Documentation
 

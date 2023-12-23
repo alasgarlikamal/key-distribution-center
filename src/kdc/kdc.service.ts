@@ -77,7 +77,7 @@ export class KdcService {
     return { privateKey, publicKey };
   }
 
-  async getEncryptedSessionKey(publicKey: string) {
+  async generateEncryptedSessionKey(publicKey: string) {
     const sessionKey = this.generateRandomSessionKey();
     console.log(sessionKey);
     const encryptedSessionKey = this.encryptWithPublicKey(
@@ -85,7 +85,7 @@ export class KdcService {
       publicKey,
     );
 
-    return { encryptedSessionKey: encryptedSessionKey };
+    return { encryptedSessionKey };
   }
 
   async decryptSessionKey(encryptedSessionKey: string, privateKey: string) {
@@ -94,7 +94,7 @@ export class KdcService {
       privateKey,
     );
 
-    return { sessionKey: sessionKey };
+    return { sessionKey };
   }
 
   async getUser(username: string | string[]) {

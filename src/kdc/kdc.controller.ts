@@ -23,7 +23,7 @@ export class KdcController {
 
   @Post('generateEncryptedSessionKey')
   async getEncryptedSessionKey(@Body('publicKey') publicKey: string) {
-    return await this.kdcService.getEncryptedSessionKey(publicKey);
+    return await this.kdcService.generateEncryptedSessionKey(publicKey);
   }
 
   @Post('decryptSessionKey')

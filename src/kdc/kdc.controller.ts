@@ -13,8 +13,8 @@ export class KdcController {
   }
 
   @Post('keys')
-  async generateKeys(@Body('username') username: string) {
-    return await this.kdcService.generateKeyPair(username);
+  async generateKeys() {
+    return await this.kdcService.generateKeyPair();
   }
 
   @Get('users')

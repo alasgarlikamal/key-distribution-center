@@ -56,9 +56,7 @@ export class KdcService {
     await this.redis.hset(`users:${username}`, { socketId, isConnected: true });
   }
 
-  async generateKeyPair(
-    username: string,
-  ): Promise<{ privateKey: string; publicKey: string }> {
+  async generateKeyPair(): Promise<{ privateKey: string; publicKey: string }> {
     const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
       modulusLength: this.keySize,
       publicKeyEncoding: {

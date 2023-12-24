@@ -1,73 +1,56 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Cryptography Project Report
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Kamal Alasgarli
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### Nijat Abdullazada
 
-## Description
+## Project Instructions
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Implement a Key Distribution Center that allow two users to share safely a cesar key Index using your own
+RSA inplementation: The server implementation should include user registration, public key storage, session key generation based on user request, exchange with related parties.
 
-## Installation
+## Technologies Used
 
-```bash
-$ npm install
-```
+- **Nest.js**: Used as it possess a modular architecture, and have built-in support for modern web features like Websockets.
+- **Redis**: Used as a database for faster operations.
+- **WebSockets**:To implement a real-time communication between two users using Key Distribution Center
 
-## Running the app
+## How it works
 
-```bash
-# development
-$ npm run start
+The main purpose here is to implement an example of a Key Distribution Center (KDC). The working principle of our application is as follows:
 
-# watch mode
-$ npm run start:dev
+If user A wants to communicate with user B, the following steps are undertaken:
 
-# production mode
-$ npm run start:prod
-```
+1. User A sends his/her public key to the User B
+2. User B generates a random session key and encrypts it with User A's public key. Then transmits the encrypted value to the user A.
+3. User A decrypts the retrieved encrypted value with his/her private key and accesses the session key.
 
-## Test
+Result: Now, both parties have a secure communication key upon which their connection can safely rely. They can use the accessed session key to communicate with each other.
 
-```bash
-# unit tests
-$ npm run test
+## Endpoint Documentation
 
-# e2e tests
-$ npm run test:e2e
+You can see the available endpoints and their purpose with specifications below:
 
-# test coverage
-$ npm run test:cov
-```
+1. `/kdc/register`:
 
-## Support
+   - Purpose: To register a user in application.
+   - Input: {username: string}
+   - Output: {message: 'Successfully registered'}
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+2. `/kdc/keys`:
 
-## Stay in touch
+   - Purpose: To retrieve the public and private keys of a user.
+   - Input: {username: string}
+   - Output: {privateKey: string, publicKey: string}
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+3. `/kdc/generateEncryptedSessionKey`:
 
-## License
+   - Purpose: To generate an encrypted session key using a randomly generated session key and encrpyting it with a public key.
+   - Input: {publicKey: string}
+   - Output: {encryptedSessionKey: string}
 
-Nest is [MIT licensed](LICENSE).
+4. `/kdc/decryptSessionKey`:
+
+   - Purpose: To decrypt the provided encrypted session key with the users private key to access plain session key.
+   - Input: {privateKey: string, encryptedSessionKey: string}
+   - Output: {sessionKey: string}

@@ -21,7 +21,6 @@ export class KdcService {
         'MATCH',
         pattern,
       );
-      console.log(redisKeys);
       keys.push(...redisKeys);
 
       // continue scanning until cursor is 0
@@ -72,30 +71,16 @@ export class KdcService {
       },
     });
 
-    await this.redis.hset(`users:${username}`, { publicKey });
-
     return { privateKey, publicKey };
   }
 
-  async generateEncryptedSessionKey(publicKey: string) {
-    const sessionKey = this.generateRandomSessionKey();
-    console.log(sessionKey);
-    const encryptedSessionKey = this.encryptWithPublicKey(
-      sessionKey,
-      publicKey,
-    );
+  // async generateEncryptedSessionKey(publicKey: string) {
+  //   const sessionKey = this.generateRandomSessionKey();
 
-    return { encryptedSessionKey };
-  }
+  //   const encryptedSessionKey = this.encryptMessage(sessionKey, publicKey);
 
-  async decryptSessionKey(encryptedSessionKey: string, privateKey: string) {
-    const sessionKey = this.decryptWithPrivateKey(
-      encryptedSessionKey,
-      privateKey,
-    );
-
-    return { sessionKey };
-  }
+  //   return { encryptedSessionKey };
+  // }
 
   async getUser(username: string | string[]) {
     return await this.redis.hgetall(`users:${username}`);
@@ -116,10 +101,10 @@ export class KdcService {
   }
 
   generateRandomSessionKey() {
-    return crypto.randomBytes(32).toString('hex');
+    return { sessionKey: crypto.randomBytes(32).toString('hex') };
   }
 
-  encryptWithPublicKey(sessionKey: string, publicKey: string) {
+  encryptSessionKey(sessionKey: string, publicKey: string) {
     const encryptedMessage = crypto.publicEncrypt(
       {
         key: publicKey,
@@ -132,16 +117,74 @@ export class KdcService {
     return encryptedMessage.toString('base64');
   }
 
-  decryptWithPrivateKey(encryptedSessionKey: string, privateKey: string) {
+  decryptSessionKey(sessionKey: string, privateKey: string) {
     const decryptedMessage = crypto.privateDecrypt(
       {
         key: privateKey,
         padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
         oaepHash: 'sha256',
       },
-      Buffer.from(encryptedSessionKey, 'base64'),
+      Buffer.from(sessionKey, 'base64'),
     );
 
     return decryptedMessage.toString();
+  }
+
+  encryptMessage(message: string, sessionKey: string) {
+    // Generate a random initialization vector (IV)
+    const iv = crypto.randomBytes(16);
+
+    // Create a cipher object with AES-GCM algorithm
+    const cipher = crypto.createCipheriv(
+      'aes-256-gcm',
+      Buffer.from(sessionKey, 'hex'),
+      iv,
+    );
+
+    // Update the cipher with the message
+    const encryptedBuffer = Buffer.concat([
+      cipher.update(message, 'utf-8'),
+      cipher.final(),
+    ]);
+
+    // Get the authentication tag
+    const tag = cipher.getAuthTag();
+
+    // Combine IV, tag, and encrypted message into a single string
+    const encryptedMessage =
+      iv.toString('hex') +
+      tag.toString('hex') +
+      encryptedBuffer.toString('hex');
+
+    // Return the encrypted message along with the IV and tag
+    return {
+      encryptedMessage,
+    };
+  }
+
+  decryptMessage(message: string, sessionKey: string) {
+    // Extract IV, tag, and encrypted message from the combined string
+    const iv = Buffer.from(message.substring(0, 32), 'hex');
+    const tag = Buffer.from(message.substring(32, 64), 'hex');
+    const encryptedMessage = Buffer.from(message.substring(64), 'hex');
+
+    // Create a decipher object with AES-GCM algorithm
+    const decipher = crypto.createDecipheriv(
+      'aes-256-gcm',
+      Buffer.from(sessionKey, 'hex'),
+      iv,
+    );
+
+    // Set the authentication tag
+    decipher.setAuthTag(tag);
+
+    // Update the decipher with the encrypted message
+    const decryptedBuffer = Buffer.concat([
+      decipher.update(encryptedMessage),
+      decipher.final(),
+    ]);
+
+    // Return the decrypted message
+    return decryptedBuffer.toString('utf-8');
   }
 }

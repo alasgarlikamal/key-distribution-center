@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { IsString } from 'class-validator';
 import { RegisterDto } from './dto/register.dto';
 import { KdcService } from './kdc.service';
 
@@ -21,19 +22,40 @@ export class KdcController {
     return await this.kdcService.getUsers();
   }
 
-  @Post('generateEncryptedSessionKey')
-  async getEncryptedSessionKey(@Body('publicKey') publicKey: string) {
-    return await this.kdcService.generateEncryptedSessionKey(publicKey);
+  @Get('session-key')
+  getSessionKey() {
+    return this.kdcService.generateRandomSessionKey();
   }
 
-  @Post('decryptSessionKey')
-  async decryptSessionKey(
-    @Body('privateKey') privateKey: string,
-    @Body('encryptedSessionKey') encryptedSessionKey: string,
+  @Post('session-key/encrypt')
+  async encryptSessionKey(
+    @Body('sessionKey') sessionKey: string,
+    @Body('encryptionKey') encryptionKey: string,
   ) {
-    return await this.kdcService.decryptSessionKey(
-      encryptedSessionKey,
-      privateKey,
-    );
+    return this.kdcService.encryptSessionKey(sessionKey, encryptionKey);
+  }
+
+  @Post('session-key/decrypt')
+  async decryptSessionKey(
+    @Body('sessionKey') sessionKey: string,
+    @Body('decryptionKey') decryptionKey: string,
+  ) {
+    return this.kdcService.decryptSessionKey(sessionKey, decryptionKey);
+  }
+
+  @Post('encrypt')
+  async encryptMessage(
+    @Body('message') message: string,
+    @Body('sessionKey') sessionKey: string,
+  ) {
+    return this.kdcService.encryptMessage(message, sessionKey);
+  }
+
+  @Post('decrypt')
+  async decryptMessage(
+    @Body('message') message: string,
+    @Body('sessionKey') sessionKey: string,
+  ) {
+    return this.kdcService.decryptMessage(message, sessionKey);
   }
 }

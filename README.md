@@ -4,6 +4,11 @@
 
 ### Nijat Abdullazada
 
+## Video Demonstration
+
+You can access the video demonstration via the link below:\
+[Video Demo](https://drive.google.com/file/d/1rcntZ8FVV9jPtTTGZe8xxyAW06oo3Ijg/view?usp=sharing)
+
 ## Project Instructions
 
 Implement a Key Distribution Center that allow two users to share safely a cesar key Index using your own
@@ -78,8 +83,3 @@ You can see the available endpoints and their purpose with specifications below:
    - Purpose: To decrypt the given encrypted string to access the message
    - Input: {encryptedMessage:string, sessionKey: string}
    - Output: {message: string}
-
-## Video Demonstration
-
-You can access the video demonstration via the link below:\
-[Video Demo](https://drive.google.com/file/d/1rcntZ8FVV9jPtTTGZe8xxyAW06oo3Ijg/view?usp=sharing)

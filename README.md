@@ -31,26 +31,55 @@ Result: Now, both parties have a secure communication key upon which their conne
 
 You can see the available endpoints and their purpose with specifications below:
 
-1. `/kdc/register`:
+1. [POST]`/kdc/register`:
 
    - Purpose: To register a user in application.
    - Input: {username: string}
    - Output: {message: 'Successfully registered'}
 
-2. `/kdc/keys`:
+2. [POST]`/kdc/keys`:
 
    - Purpose: To retrieve the public and private keys of a user.
    - Input: {username: string}
    - Output: {privateKey: string, publicKey: string}
 
-3. `/kdc/generateEncryptedSessionKey`:
+3. [GET]`/kdc/users`:
 
-   - Purpose: To generate an encrypted session key using a randomly generated session key and encrpyting it with a public key.
-   - Input: {publicKey: string}
+   - Purpose: To retrieve all of the registered users
+   - Input: {None}
+   - Output: {all registered users}
+
+4. [GET]`/kdc/session-key`:
+
+   - Purpose: To generate and retrieve a session key
+   - Input: {None}
+   - Output: {sessionKey: string}
+
+5. [POST]`/kdc/session-key/encrypt`:
+
+   - Purpose: To encrypt the given session key using the provided public key.
+   - Input: {publicKey: string, sessionKey: string}
    - Output: {encryptedSessionKey: string}
 
-4. `/kdc/decryptSessionKey`:
+6. [POST]`/kdc/session-key/decrypt`:
 
-   - Purpose: To decrypt the provided encrypted session key with the users private key to access plain session key.
-   - Input: {privateKey: string, encryptedSessionKey: string}
+   - Purpose: To decrypt the given encrypted value using the provided private key.
+   - Input: { encryptedSessionKey: string, privateKey: string}
    - Output: {sessionKey: string}
+
+7. [POST]`/kdc/encrypt`:
+
+   - Purpose: To encrypt a message using session-key to establish secure communication
+   - Input: {message:string, sessionKey: string}
+   - Output: {encryptedMessage: string}
+
+8. [POST]`/kdc/decrypt`:
+
+   - Purpose: To decrypt the given encrypted string to access the message
+   - Input: {encryptedMessage:string, sessionKey: string}
+   - Output: {message: string}
+
+## Video Demonstration
+
+You can access the video demonstration via the link below:\
+[Video Demo](https://drive.google.com/file/d/1rcntZ8FVV9jPtTTGZe8xxyAW06oo3Ijg/view?usp=sharing)
